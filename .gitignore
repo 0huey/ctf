@@ -2,3 +2,4 @@ binaryninja
 hackthebox/hackthebox.conf
 .vagrant
 *.zip
+__pycache__

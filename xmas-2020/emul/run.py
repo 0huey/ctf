@@ -10,7 +10,7 @@ def Main(rom_path, socket=None):
 
     emu = cpu.EMU10(program, socket)
 
-    emu.run(True)
+    emu.run(False)
 
 
 if __name__ == '__main__':
