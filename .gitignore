@@ -3,3 +3,4 @@ hackthebox/hackthebox.conf
 .vagrant
 *.zip
 __pycache__
+build
