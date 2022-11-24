@@ -3,11 +3,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <time.h>
 
 #ifdef _WIN32
 #pragma warning(disable: 4996)  //strncpy
 #include <windows.h>
-#include <time.h>
 #define _USE_32BIT_TIME_T
 #endif
 
@@ -146,7 +146,12 @@ char * factorial(int n) {
 
         if (multiplier % 100 == 0) {
             uint64_t elapsedTime = TimeNow()  -  startTime;
-            printf("%d: %lu.%lu s\n", multiplier, elapsedTime / 1000000000, elapsedTime%1000000000);
+#ifdef _WIN32
+            char * format = "%d: %llu.%llu s\n";
+#else
+            char * format = "%d: %lu.%lu s\n";
+#endif
+            printf(format, multiplier, elapsedTime/1000000000, elapsedTime%1000000000);
         }
     }
 
@@ -177,11 +182,13 @@ void RevStr(char * str) {
 }
 
 uint64_t TimeNow(void) {
-#ifdef _WIN32
     struct timespec ts;
+#ifdef _WIN32
     timespec_get(&ts, TIME_UTC);
-    return 1000000000 * ts.tv_sec + ts.tv_nsec;
-#else
-    return 0;
+
+#elif __linux__
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
 #endif
+    return (uint64_t)(ts.tv_sec) * (uint64_t)1000000000 + (int64_t)ts.tv_nsec;
 }
