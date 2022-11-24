@@ -1,12 +1,15 @@
-## 10000!
+# 10000!
 
-### single threaded result
+## single threaded result
 `10000: 757.946367400 s`
 
-### multi threaded result
+## multi threaded result
+
+### Windows:
 `10000: 200.612581700 s`
 
----------------------
-
-To Do:
-finish cross platform
+### Linux:
+```
+10000: 25.427663748 s
+2.846259680 x 10^35659
+```

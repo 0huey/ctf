@@ -4,3 +4,4 @@ hackthebox/hackthebox.conf
 *.zip
 __pycache__
 build
+a.out

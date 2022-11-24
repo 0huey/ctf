@@ -1,3 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(factorial)
+if (UNIX)
+    link_libraries(pthread)
+endif()
 add_executable(factorial factorial.c)

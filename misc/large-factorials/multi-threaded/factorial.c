@@ -13,28 +13,33 @@
 
 VOID CALLBACK FactorialMul(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WORK work);
 
+#elif __linux__
+
+#include <pthread.h>
+
+void* FactorialMul(void* context);
+#endif
+
 typedef struct _THREAD_CALLBACK_PARAMS {
     char* output;
     char* multiplicand;
     char* multiplier;
     size_t iMultiplier;
 } THREAD_CALLBACK_PARAMS;
-#endif
 
 #define DIGIT_STR_INT_CONV '0'
 #define NUM_PRODUCTS 6
 #define MEM_SIZE 500000
-#define NUM_WORKERS 4
 
 char* factorial(int n);
 void SumProducts(char** products, char* szMultiplicand);
 char DigitStrToInt(char digit);
 char DigitIntToStr(char digit);
-void RevStr(char *str);
+void RevStr(char* str);
 uint64_t TimeNow(void);
 
 
-int main(int argc, char**argv) {
+int main(int argc, char** argv) {
     if (argc == 2) {
         char* result = factorial(atoi(argv[1]));
 
@@ -87,9 +92,13 @@ char* factorial(int n) {
     TP_CALLBACK_ENVIRON callBackEnviron;
     InitializeThreadpoolEnvironment(&callBackEnviron);
     PTP_POOL pool = CreateThreadpool(NULL);
-    SetThreadpoolThreadMaximum(pool, NUM_WORKERS);
-    SetThreadpoolThreadMinimum(pool, NUM_WORKERS);
+    SetThreadpoolThreadMaximum(pool, NUM_PRODUCTS);
+    SetThreadpoolThreadMinimum(pool, NUM_PRODUCTS);
     SetThreadpoolCallbackPool(&callBackEnviron, pool);
+
+#elif __linux__
+
+
 #endif
 
     //implement long multiplication
@@ -98,25 +107,42 @@ char* factorial(int n) {
         snprintf(szMultiplier, 16, "%d", multiplier);
         RevStr(szMultiplier);
 
-#ifdef _WIN32
         THREAD_CALLBACK_PARAMS params[NUM_PRODUCTS];
+
+#ifdef _WIN32
         PTP_WORK work[NUM_PRODUCTS] = {NULL};
+#elif __linux__
+        pthread_t threads[NUM_PRODUCTS] = {0};
+#endif
 
         for (size_t iMultiplier = 0; iMultiplier < strlen(szMultiplier) && iMultiplier < NUM_PRODUCTS; iMultiplier++) {
             params[iMultiplier].output = products[iMultiplier];
             params[iMultiplier].multiplicand = szMultiplicand;
             params[iMultiplier].multiplier = szMultiplier;
             params[iMultiplier].iMultiplier = iMultiplier;
+#ifdef _WIN32
             work[iMultiplier] = CreateThreadpoolWork((PTP_WORK_CALLBACK)FactorialMul, &params[iMultiplier], &callBackEnviron);
             SubmitThreadpoolWork(work[iMultiplier]);
+#elif __linux__
+            if (pthread_create(&threads[iMultiplier], NULL, FactorialMul, &params[iMultiplier]) != 0) {
+                puts("Thread error\n");
+                exit(1);
+            }
+#endif
         }
 
         for (int i = 0; i < NUM_PRODUCTS; i++) {
+#ifdef _WIN32
             if (work[i] != NULL) {
                 WaitForThreadpoolWorkCallbacks(work[i], false);
             }
-        }
+#elif __linux__
+            if (threads[i] != 0) {
+                pthread_join(threads[i], NULL);
+            }
 #endif
+        }
+
         SumProducts(products, szMultiplicand);
 
         if (multiplier % 100 == 0) {
@@ -164,7 +190,7 @@ void SumProducts(char** products, char* szMultiplicand) {
         if (!done) {
             sum += carry;
             carry = sum / 10;
-            * pSzSum++ = DigitIntToStr( sum % 10 );
+            *pSzSum++ = DigitIntToStr( sum % 10 );
         }
     }
     if (carry > 0) {
@@ -175,7 +201,11 @@ void SumProducts(char** products, char* szMultiplicand) {
 }
 
 #ifdef _WIN32
-VOID CALLBACK FactorialMul(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WORK work) {
+VOID CALLBACK FactorialMul(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WORK work)
+#elif __linux__
+void* FactorialMul(void* context)
+#endif
+{
     THREAD_CALLBACK_PARAMS* params = (THREAD_CALLBACK_PARAMS*)context;
 
     char* pSzProduct = params->output;
@@ -203,9 +233,8 @@ VOID CALLBACK FactorialMul(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WO
     if (carry > 0) {
         *pSzProduct++ = DigitIntToStr(carry);
     }
-    * pSzProduct = '\0';
+    *pSzProduct = '\0';
 }
-#endif
 
 char DigitStrToInt(char digit) {
     return digit - DIGIT_STR_INT_CONV;
@@ -215,13 +244,13 @@ char DigitIntToStr(char digit) {
     return digit + DIGIT_STR_INT_CONV;
 }
 
-void RevStr(char * str) {
-    char * p1 = str;
-    char * p2 = str  +  strlen(str)  -  1;
+void RevStr(char* str) {
+    char* p1 = str;
+    char* p2 = str  +  strlen(str)  -  1;
     while (p1 < p2) {
-        char temp = * p1;
-        * p1++ = * p2;
-        * p2-- = temp;
+        char temp = *p1;
+        *p1++ = * p2;
+        *p2-- = temp;
     }
 }
 
@@ -231,8 +260,8 @@ uint64_t TimeNow(void) {
     timespec_get(&ts, TIME_UTC);
 
 #elif __linux__
-    return 0;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
 
 #endif
-    return 1000000000 * ts.tv_sec + ts.tv_nsec;
+    return (uint64_t)(ts.tv_sec) * (uint64_t)1000000000 + (int64_t)ts.tv_nsec;
 }
