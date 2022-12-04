@@ -1,7 +1,7 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt-get install -y firewalld ncat gdb gdbserver jq python3-pip strace openjdk-11-jdk openjdk-11-jre
+apt-get install -y firewalld ncat gdb gdbserver jq python3-pip strace openjdk-17-jdk openjdk-17-jre
 
 pip3 install pwntools ROPGadget keystone-engine ropper
 
