@@ -31,4 +31,4 @@ USER pwn
 
 CMD ["./start_servers.sh"]
 
-EXPOSE 4200 4201
+EXPOSE 4200-4205
