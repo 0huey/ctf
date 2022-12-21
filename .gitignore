@@ -5,3 +5,4 @@ hackthebox/hackthebox.conf
 __pycache__
 build
 a.out
+*.db
