@@ -9,24 +9,12 @@
     #include <windows.h>
     #pragma warning(disable: 4996)  //strncpy
     #define _USE_32BIT_TIME_T
-    VOID CALLBACK FactorialMul(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WORK work);
-
-#elif __linux__
-    #include <pthread.h>
-    void* FactorialMul(void* context);
 #endif
 
 typedef struct _LIST_DIGIT {
     struct _LIST_DIGIT* next;
     char digit;
 } LIST_DIGIT;
-
-typedef struct _THREAD_CALLBACK_PARAMS {
-    char** result;
-    char* multiplicand;
-    char multiplier;
-    size_t num_zeros;
-} THREAD_CALLBACK_PARAMS;
 
 #define SEC_TO_NSEC 1000000000
 
@@ -35,6 +23,7 @@ typedef struct _THREAD_CALLBACK_PARAMS {
 #define DigitIntToStr(digit) (digit + DIGIT_STR_INT_CONV)
 
 char* factorial(int n);
+char* FactorialMul(char* multiplicand, char multiplier, size_t num_zeros);
 LIST_DIGIT* PrependList(LIST_DIGIT* list, char value, int* count);
 void CollapseList(LIST_DIGIT* list, char* output);
 char* SumProducts(char** products, int num_products, char* szMultiplicand);

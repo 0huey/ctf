@@ -1,29 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <inttypes.h>
-#include <time.h>
+#include "factorial.h"
 
-#ifdef _WIN32
-#pragma warning(disable: 4996)  //strncpy
-#include <windows.h>
-#define _USE_32BIT_TIME_T
-#endif
+#define PRINT_INTERVAL 1000
 
-#define DIGIT_STR_INT_CONV '0'
-#define NUM_PRODUCTS 6
-#define MEM_SIZE 500000
-
-char * factorial(int n);
-char DigitStrToInt(char digit);
-char DigitIntToStr(char digit);
-void RevStr(char *str);
-uint64_t TimeNow(void);
-
-int main(int argc, char**argv) {
+int main(int argc, char** argv) {
     if (argc == 2) {
-        char * result = factorial(atoi(argv[1]));
+        int n = atoi(argv[1]);
+        char* result = factorial(n);
 
         if (strlen(result) > 10) {
             char sci[16] = {'\0'};
@@ -32,7 +14,7 @@ int main(int argc, char**argv) {
 
             strncpy(sci + 2, result + 1, 9);
 
-            printf("%s x 10^%zu\n", sci, strlen(result) - 1);
+            printf("%d! = %s x 10^%zu\n", n, sci, strlen(result) - 1);
         }
         else {
             printf("%s\n", result);
@@ -41,143 +23,176 @@ int main(int argc, char**argv) {
     return 0;
 }
 
-char * factorial(int n) {
-    char * szMultiplicand = malloc(MEM_SIZE);
-    szMultiplicand[0] = '1';
-    szMultiplicand[1] = '\0';
+char* factorial(int n) {
+    char* str_result = malloc(2);
+    str_result[0] = '1';
+    str_result[1] = '\0';
 
     if (n == 0 || n == 1) {
-        return szMultiplicand;
-    }
-    if (n < 0 || n > 999999) {
-        * szMultiplicand = '\0';
-        return szMultiplicand;
+        return str_result;
     }
 
-    char szMultiplier[16] = {'\0'};
+    char str_multiplier[16] = {'\0'};
 
-    // 'products' are the lines of multiplication results for each digit of the multiplier before summing
-    // NUM_PRODUCTS is the max length of the multiplier supported
-    // so with NUM_PRODUCTS == 6, we could calculate up to 999999!
-    char * products[NUM_PRODUCTS];
-
-    for (int i = 0; i < NUM_PRODUCTS; i++) {
-        // 100000! has 456573 digits
-        char * mem = malloc(MEM_SIZE);
-        * mem = '\0';
-        products[i] = mem;
+    //str_multiplier[16] puts a hard limit at 999999999999999! (15 chars)
+    if (n < 0 || n > 999999999999999) {
+        *str_result = '\0';
+        return str_result;
     }
+
+    /*
+    products are the lines of multiplication results for each digit of the multiplier before summing
+    ie, 111 * 99 in long multiplication is solved as
+
+         111
+        x 99
+        ----
+         999  <----- both of these are the 'products'
+      + 9990  <-----
+        ----
+       10989
+    */
+    char** products = NULL;
 
     uint64_t startTime = TimeNow();
 
     //implement long multiplication
     for (int multiplier = 2; multiplier <= n; multiplier++) {
 
-        snprintf(szMultiplier, 16, "%d", multiplier);
-        RevStr(szMultiplier);
+        int len_multiplier = snprintf(str_multiplier, 16, "%d", multiplier);
 
-        for (size_t iMultiplier = 0; iMultiplier < strlen(szMultiplier) && iMultiplier < NUM_PRODUCTS; iMultiplier++) {
-            char * pSzProduct = products[iMultiplier];
+        RevStr(str_multiplier);
 
-            for (size_t i = 0; i < iMultiplier; i++) {
-                //append a 0 for each xth digit of the multiplier
-                // ie 9* 111 == 9 + 90 + 900
-                * pSzProduct++ = DigitIntToStr(0);
-            }
+        products = calloc(len_multiplier, sizeof(char*));
 
-            int carry = 0;
-
-            for (size_t iMultiplicand = 0; iMultiplicand < strlen(szMultiplicand); iMultiplicand++) {
-                char mul1 = DigitStrToInt( szMultiplicand[iMultiplicand] );
-                char mul2 = DigitStrToInt( szMultiplier[iMultiplier] );
-
-                char prod = (mul1 * mul2) + carry;
-                carry = prod / 10;
-
-                * pSzProduct++ = DigitIntToStr( prod % 10 );
-            }
-            if (carry > 0) {
-                * pSzProduct++ = DigitIntToStr(carry);
-            }
-            * pSzProduct = '\0';
-            pSzProduct = NULL;
+        for (int i = 0; i < len_multiplier; i++) {
+            products[i] = FactorialMul(str_result, str_multiplier[i], i);
         }
 
-        //pointer iterators for each product line to be summed
-        char * pProducts[NUM_PRODUCTS];
-        for (int i = 0; i < NUM_PRODUCTS; i++) {
-            pProducts[i] = products[i];
+        free(str_result);
+
+        str_result = SumProducts(products, len_multiplier, str_result);
+
+        for (int i = 0; i < len_multiplier; i++) {
+            free(products[i]);
         }
+        free(products);
+        products = NULL;
 
-        char * pSzSum = szMultiplicand;
-        int carry = 0;
-        bool done = false;
-        char * digit;
+        if (multiplier % PRINT_INTERVAL == 0) {
+            uint64_t elapsedTime = TimeNow() - startTime;
+            printf("%d: %zu.%zu s\n", multiplier, elapsedTime / SEC_TO_NSEC, elapsedTime % SEC_TO_NSEC);
+        }
+    }
 
-        while (!done) {
-            //sum each product line
-            done = true;
-            int sum = 0;
+    uint64_t elapsedTime = TimeNow() - startTime;
+    printf("Total elapsed: %zu.%zu s\n", elapsedTime / SEC_TO_NSEC, elapsedTime % SEC_TO_NSEC);
 
-            for (int i = 0; i < NUM_PRODUCTS; i++) {
-                if (pProducts[i] != NULL) {
-                    digit = pProducts[i]++;
+    RevStr(str_result);
+    return str_result;
+}
 
-                    if (* digit != '\0') {
-                        done = false;
-                        sum += DigitStrToInt(* digit);
-                    }
-                    else {
-                        pProducts[i] = NULL;
-                    }
+char* FactorialMul(char* multiplicand, char multiplier, size_t num_zeros) {
+
+    // store the digits in a linked list since we dont know how many we'll need ahead of time
+    LIST_DIGIT* list = NULL;
+    int list_len = 0;
+
+    while (num_zeros-- > 0) {
+        //append a 0 for each xth digit of the multiplier
+        // ie 9* 111 == 9 + 90 + 900
+        list = PrependList(list, DigitIntToStr(0), &list_len);
+    }
+
+    int carry = 0;
+
+    while (*multiplicand != '\0') {
+        char prod = DigitStrToInt(*multiplicand) * DigitStrToInt(multiplier) + carry;
+        multiplicand++;
+
+        carry = prod / 10;
+
+        list = PrependList(list, DigitIntToStr( prod % 10 ), &list_len);
+    }
+
+    if (carry > 0) {
+        list = PrependList(list, DigitIntToStr(carry), &list_len);
+    }
+
+    char* output = malloc(list_len + 1);
+    CollapseList(list, output);
+    RevStr(output);
+    return output;
+}
+
+LIST_DIGIT* PrependList(LIST_DIGIT* list, char value, int* count) {
+    LIST_DIGIT* new = malloc(sizeof(LIST_DIGIT));
+    new->digit = value;
+    new->next = list;
+    *count = *count + 1;
+    return new;
+}
+
+void CollapseList(LIST_DIGIT* list, char* output) {
+    while (list != NULL) {
+        *output++ = list->digit;
+        void* temp = list;
+        list = list->next;
+        free(temp);
+    }
+    *output = '\0';
+}
+
+char* SumProducts(char** products, int num_products, char* str_result) {
+    int len_result = strlen(products[num_products-1]) * 2;
+    str_result = malloc(len_result);
+    //pointer iterators for each product line to be summed
+    char** p_products = calloc(num_products, sizeof(char*));
+    memcpy(p_products, products, num_products * sizeof(char*));
+
+    char* p_sum = str_result;
+    int carry = 0;
+    bool done = false;
+
+    while (!done) {
+        //sum each product line
+        //need a done flag because each product line will have a different number of digits
+        done = true;
+        int sum = 0;
+
+        for (int i = 0; i < num_products; i++) {
+            if (p_products[i] != NULL) {
+
+                if (*p_products[i] != '\0') {
+                    done = false;
+                    sum += DigitStrToInt(*p_products[i]++);
+                }
+                else {
+                    p_products[i] = NULL;
                 }
             }
-            if (!done) {
-                sum += carry;
-                carry = sum / 10;
-                * pSzSum++ = DigitIntToStr( sum % 10 );
-            }
         }
-        if (carry > 0) {
-            * pSzSum = DigitIntToStr(carry);
-            pSzSum++;
-        }
-        * pSzSum = '\0';
-
-        if (multiplier % 100 == 0) {
-            uint64_t elapsedTime = TimeNow()  -  startTime;
-#ifdef _WIN32
-            char * format = "%d: %llu.%llu s\n";
-#else
-            char * format = "%d: %lu.%lu s\n";
-#endif
-            printf(format, multiplier, elapsedTime/1000000000, elapsedTime%1000000000);
+        if (!done) {
+            sum += carry;
+            carry = sum / 10;
+            *p_sum++ = DigitIntToStr( sum % 10 );
         }
     }
-
-    for (int i = 0; i < NUM_PRODUCTS; i++) {
-        free(products[i]);
+    if (carry > 0) {
+        *p_sum++ = DigitIntToStr(carry);
     }
+    *p_sum = '\0';
 
-    RevStr(szMultiplicand);
-    return szMultiplicand;
+    return str_result;
 }
 
-char DigitStrToInt(char digit) {
-    return digit - DIGIT_STR_INT_CONV;
-}
-
-char DigitIntToStr(char digit) {
-    return digit + DIGIT_STR_INT_CONV;
-}
-
-void RevStr(char * str) {
-    char * p1 = str;
-    char * p2 = str  +  strlen(str)  -  1;
+void RevStr(char* str) {
+    char* p1 = str;
+    char* p2 = str + strlen(str) - 1;
     while (p1 < p2) {
-        char temp = * p1;
-        * p1++ = * p2;
-        * p2-- = temp;
+        char temp = *p1;
+        *p1++ = *p2;
+        *p2-- = temp;
     }
 }
 
@@ -190,5 +205,5 @@ uint64_t TimeNow(void) {
     clock_gettime(CLOCK_MONOTONIC, &ts);
 
 #endif
-    return (uint64_t)(ts.tv_sec) * (uint64_t)1000000000 + (int64_t)ts.tv_nsec;
+    return (uint64_t)(ts.tv_sec) * (uint64_t)SEC_TO_NSEC + (int64_t)ts.tv_nsec;
 }
