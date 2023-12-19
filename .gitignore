@@ -5,4 +5,8 @@ hackthebox/hackthebox.conf
 __pycache__
 build
 a.out
+*.so
 *.db
+advent-of-code/*/*/*.txt
+advent-of-code/*/*/solve
+advent-of-code/*/*/solve-p2
