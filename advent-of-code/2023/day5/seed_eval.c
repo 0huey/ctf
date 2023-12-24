@@ -18,10 +18,11 @@ uint64_t get_seed_location(const struct almanac* alm, uint64_t seed) {
 		const struct ptr_array* map_array = &alm->maps[m];
 
 		/* Implement a kind of binary search on the source value.
-		 * Once we find an index with a source value less than the
-		 * search value, we still have to check a lot of
+		 * Once we find an index with a source value greater than the
+		 * search value, we still have to check each range sequentially
 		 */
 
+		// start at 3/4
 		size_t i = (map_array->len >> 1) + (map_array->len >> 2);
 		size_t limit = map_array->len;
 
@@ -45,7 +46,7 @@ uint64_t get_seed_location(const struct almanac* alm, uint64_t seed) {
 				break;
 			}
 
-			/* once the source index is less than the search value,
+			/* once the source index is greater than the search value,
 			 * we have to check each range one by one because the range
 			 * is not predictable
 			 */
