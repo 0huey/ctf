@@ -26,6 +26,8 @@ int int_comparator(const void* a, const void* b) ;
 
 void init_ptr_array(struct ptr_array* a);
 void append_ptr_array(struct ptr_array* a, void* value);
+void free_ptr_array(struct ptr_array* a);
 
 void init_uint64_array(struct uint64_array* a);
 void append_uint64_array(struct uint64_array* a, uint64_t value);
+void free_uint64_array(struct uint64_array* a);

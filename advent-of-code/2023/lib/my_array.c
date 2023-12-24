@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "my_array.h"
 
 
@@ -49,6 +50,14 @@ void append_ptr_array(struct ptr_array* a, void* value) {
 	a->array[a->len++] = value;
 }
 
+void free_ptr_array(struct ptr_array* a) {
+	if (a == NULL || a->array == NULL) {
+		puts("null pointer passed to free_uint64_array()");
+		return;
+	}
+	free(a->array);
+}
+
 void init_uint64_array(struct uint64_array* a) {
 	a->len = 0;
 	a->max_len = MY_ARRAY_LEN;
@@ -65,4 +74,12 @@ void append_uint64_array(struct uint64_array* a, uint64_t value) {
 	}
 
 	a->array[a->len++] = value;
+}
+
+void free_uint64_array(struct uint64_array* a) {
+	if (a == NULL || a->array == NULL) {
+		puts("null pointer passed to free_uint64_array()");
+		return;
+	}
+	free(a->array);
 }
