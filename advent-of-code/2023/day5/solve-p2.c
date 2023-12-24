@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "read_file.h"
 #include "my_array.h"
 #include "almanac.h"
@@ -46,6 +47,8 @@ int main(int argc, char** argv) {
 	uint64_t best_seed;
 	uint64_t best_location = UINT64_MAX;
 
+	clock_t begin = clock();
+
 	for (size_t s = 0; s < seed_ranges->len; s += 2) {
 		size_t seed  = seed_ranges->array[s];
 		size_t limit = seed + seed_ranges->array[s+1];
@@ -59,6 +62,11 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
+
+	clock_t end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+	printf("run time %f s\n", time_spent);
 
 	printf("best seed %lu at location %lu\n", best_seed, best_location);
 
