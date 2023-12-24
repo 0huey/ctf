@@ -22,7 +22,7 @@ uint64_t get_seed_location(const struct almanac* alm, uint64_t seed) {
 		 * search value, we still have to check a lot of
 		 */
 
-		size_t i = map_array->len >> 1;
+		size_t i = (map_array->len >> 1) + (map_array->len >> 2);
 		size_t limit = map_array->len;
 
 		while (i != limit) {
