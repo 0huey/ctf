@@ -10,47 +10,50 @@ extern bool DEBUG;
 uint64_t get_seed_location(const struct almanac* alm, uint64_t seed) {
 	uint64_t source_value = seed;
 
-	const struct map* this_map;
-	const struct uint64_array* source;
-	const struct uint64_array* dest;
-	const struct uint64_array* range;
-
 	if (DEBUG) {
 		printf("\nseed %lu\n", source_value);
 	}
 
 	for (size_t m = 0; m < NUM_MAPS; m++) {
-		this_map = &alm->maps[m];
+		const struct ptr_array* map_array = &alm->maps[m];
 
-		source = &this_map->values[SOURCE];
-		dest   = &this_map->values[DEST];
-		range  = &this_map->values[RANGE];
+		/* Implement a kind of binary search on the source value.
+		 * Once we find an index with a source value less than the
+		 * search value, we still have to check a lot of
+		 */
 
-		if (source->len != dest->len || source->len != range->len) {
-			/* the length of these arrays should already be the same
-			 * because the parser checks and would have failed otherwise
-			 * but just in case
-			 */
-			puts("array length error");
-			exit(-1);
-		}
+		size_t i = map_array->len >> 1;
+		size_t limit = map_array->len;
 
-		for (size_t i = 0; i < source->len; i++) {
+		while (i != limit) {
+			const struct mapping* map = (const struct mapping*)map_array->array[i];
 
-			if (source_value >= source->array[i]
-			&& source_value < source->array[i] + range->array[i]) {
+			if (source_value < map->source) {
+				if (i == 0) {
+					break;
+				}
+				limit = i;
+				i = i >> 1;
+				continue;
+			}
 
-				uint64_t diff = source_value - source->array[i];
+			// already checked that source_value >= map->source
+			if (source_value < map->source + map->range) {
 
-				source_value = dest->array[i] + diff;
-
+				uint64_t diff = source_value - map->source;
+				source_value = map->dest + diff;
 				break;
 			}
+
+			/* once the source index is less than the search value,
+			 * we have to check each range one by one because the range
+			 * is not predictable
+			 */
+			i++;
 		}
 		if (DEBUG) {
 			printf("map %lu dest %lu\n", m, source_value);
 		}
 	}
-
 	return source_value;
 }

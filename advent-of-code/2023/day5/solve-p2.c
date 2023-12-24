@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
 		DEBUG = true;
 	}
 
+	clock_t begin = clock();
+
 	struct almanac* alm = almanac_parser(filebuff);
 
 	free(filebuff);
@@ -44,10 +46,7 @@ int main(int argc, char** argv) {
 		return 4;
 	}
 
-	uint64_t best_seed;
 	uint64_t best_location = UINT64_MAX;
-
-	clock_t begin = clock();
 
 	for (size_t s = 0; s < seed_ranges->len; s += 2) {
 		size_t seed  = seed_ranges->array[s];
@@ -58,7 +57,6 @@ int main(int argc, char** argv) {
 
 			if (location < best_location) {
 				best_location = location;
-				best_seed = seed;
 			}
 		}
 	}
@@ -68,7 +66,7 @@ int main(int argc, char** argv) {
 
 	printf("run time %f s\n", time_spent);
 
-	printf("best seed %lu at location %lu\n", best_seed, best_location);
+	printf("best seed at location %lu\n", best_location);
 
 	almanac_free(alm);
 	free(alm);

@@ -14,46 +14,45 @@ const char STR_LIGHT_TEMP[] = "light";
 const char STR_TEMP_HUM[] = "temp";
 const char STR_HUM_LOC[] = "humid";
 
+int mapping_comparator(const void* p1, const void* p2);
+
 struct almanac* almanac_parser(char* input) {
 	struct almanac* alm = malloc(sizeof(struct almanac));
 
 	init_uint64_array(&alm->seeds);
 
-	struct map* this_map;
+	struct ptr_array* map_array;
 
 	for (size_t i = 0; i < NUM_MAPS; i++) {
-		this_map = &alm->maps[i];
+		map_array = &alm->maps[i];
 
-		for (size_t x = 0; x < NUM_MAP_VALUES; x++) {
-			init_uint64_array(&this_map->values[x]);
-		}
+		init_ptr_array(map_array);
 	}
 
-	this_map = NULL;
+	map_array = NULL;
 
 	char* line = strtok(input, "\n");
 
 	while (line != NULL) {
 		if (isdigit(*line)) {
-			uint64_t nums[NUM_MAP_VALUES];
+			struct mapping* values = malloc(sizeof(struct mapping));
 
 			if(sscanf(
 			line,
 			"%lu %lu %lu",
-			&nums[DEST],
-			&nums[SOURCE],
-			&nums[RANGE]) != 3) {
+			&values->dest,
+			&values->source,
+			&values->range) != 3) {
 				printf("Could not parse 3 nums here: %s", line);
 				goto ERROR_EXIT;
 			}
 
-			if (this_map == NULL) {
+			if (map_array == NULL) {
+				puts("null map ptr");
 				goto ERROR_EXIT;
 			}
 
-			for (size_t i = 0; i < NUM_MAP_VALUES; i++) {
-				append_uint64_array(&this_map->values[i], nums[i]);
-			}
+			append_ptr_array(map_array, values);
 		}
 		else if (!strncmp(line, STR_SEEDS, sizeof(STR_SEEDS)-1)) {
 
@@ -80,33 +79,43 @@ struct almanac* almanac_parser(char* input) {
 			}
 		}
 		else if (!strncmp(line, STR_SEED_SOIL, sizeof(STR_SEED_SOIL)-1)) {
-			this_map = &alm->maps[SEED_TO_SOIL];
+			map_array = &alm->maps[SEED_TO_SOIL];
 		}
 		else if (!strncmp(line, STR_SOIL_FERT, sizeof(STR_SOIL_FERT)-1)) {
-			this_map = &alm->maps[SOIL_TO_FERTILIZER];
+			map_array = &alm->maps[SOIL_TO_FERTILIZER];
 		}
 		else if (!strncmp(line, STR_FERT_WATER, sizeof(STR_FERT_WATER)-1)) {
-			this_map = &alm->maps[FERTILIZER_TO_WATER];
+			map_array = &alm->maps[FERTILIZER_TO_WATER];
 		}
 		else if (!strncmp(line, STR_WATER_LIGHT, sizeof(STR_WATER_LIGHT)-1)) {
-			this_map = &alm->maps[WATER_TO_LIGHT];
+			map_array = &alm->maps[WATER_TO_LIGHT];
 		}
 		else if (!strncmp(line, STR_LIGHT_TEMP, sizeof(STR_LIGHT_TEMP)-1)) {
-			this_map = &alm->maps[LIGHT_TO_TEMPERATURE];
+			map_array = &alm->maps[LIGHT_TO_TEMPERATURE];
 		}
 		else if (!strncmp(line, STR_TEMP_HUM, sizeof(STR_TEMP_HUM)-1)) {
-			this_map = &alm->maps[TEMPERATURE_TO_HUMIDITY];
+			map_array = &alm->maps[TEMPERATURE_TO_HUMIDITY];
 		}
 		else if (!strncmp(line, STR_HUM_LOC, sizeof(STR_HUM_LOC)-1)) {
-			this_map = &alm->maps[HUMIDITY_TO_LOCATION];
+			map_array = &alm->maps[HUMIDITY_TO_LOCATION];
 		}
 		else {
-			this_map = NULL;
+			map_array = NULL;
 			printf("passed line: %s\n", line);
 		}
 
 		line = strtok(NULL, "\n");
 	}
+
+	almanac_print(alm);
+
+	for (size_t i = 0; i < NUM_MAPS; i++) {
+		struct ptr_array* map_array = &alm->maps[i];
+
+		qsort(map_array->array, map_array->len, sizeof(void*), &mapping_comparator);
+	}
+
+	almanac_print(alm);
 
 	return alm;
 
@@ -117,26 +126,22 @@ ERROR_EXIT:
 }
 
 void almanac_free(struct almanac* alm) {
-	struct uint64_array* a = &alm->seeds;
-	free(a->array);
+	free_uint64_array(&alm->seeds);
 
 	for (size_t i = 0; i < NUM_MAPS; i++) {
-		struct map* this_map = &alm->maps[i];
+		struct ptr_array* map_array = &alm->maps[i];
 
-		for (size_t x = 0; x < NUM_MAP_VALUES; x++) {
-			a = &this_map->values[x];
-			free(a->array);
+		for (size_t x = 0; x < map_array->len; x++) {
+			struct mapping* map = map_array->array[x];
+			free(map);
 		}
+		free_ptr_array(map_array);
 	}
 }
 
 void almanac_print(const struct almanac* alm) {
 	const struct uint64_array* seeds = &alm->seeds;
-
-	const struct map* this_map;
-	const struct uint64_array* source;
-	const struct uint64_array* dest;
-	const struct uint64_array* range;
+	const struct ptr_array* map_array;
 
 	puts("verifying parser:");
 	printf("seeds: ");
@@ -148,17 +153,27 @@ void almanac_print(const struct almanac* alm) {
 	printf("\n\n");
 
 	for (size_t m = 0; m < NUM_MAPS; m++) {
-		this_map = &alm->maps[m];
-
-		source = &this_map->values[SOURCE];
-		dest   = &this_map->values[DEST];
-		range  = &this_map->values[RANGE];
+		map_array = &alm->maps[m];
 
 		printf("map %lu\n", m);
 
-		for (size_t i = 0; i < source->len; i++) {
-			printf("%lu %lu %lu\n", source->array[i], dest->array[i], range->array[i]);
+		for (size_t i = 0; i < map_array->len; i++) {
+			const struct mapping* map = (const struct mapping*)map_array->array[i];
+			printf("%lu %lu %lu\n", map->dest, map->source, map->range);
 		}
 		puts("");
 	}
+}
+
+int mapping_comparator(const void* p1, const void* p2) {
+	const struct mapping* map1 = *(const struct mapping**)p1;
+	const struct mapping* map2 = *(const struct mapping**)p2;
+
+	if (map1->source < map2->source) {
+		return -1;
+	}
+	else if (map1->source > map2->source) {
+		return 1;
+	}
+	return 0;
 }

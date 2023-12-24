@@ -11,20 +11,15 @@ enum map_type {
 	NUM_MAPS
 };
 
-enum map_values {
-	DEST,
-	SOURCE,
-	RANGE,
-	NUM_MAP_VALUES
-};
-
-struct map {
-	struct uint64_array values[NUM_MAP_VALUES];
+struct mapping {
+	uint64_t dest;
+	uint64_t source;
+	uint64_t range;
 };
 
 struct almanac {
 	struct uint64_array seeds;
-	struct map maps[NUM_MAPS];
+	struct ptr_array maps[NUM_MAPS];
 };
 
 struct almanac* almanac_parser(char* input);
