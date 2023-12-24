@@ -107,15 +107,11 @@ struct almanac* almanac_parser(char* input) {
 		line = strtok(NULL, "\n");
 	}
 
-	almanac_print(alm);
-
 	for (size_t i = 0; i < NUM_MAPS; i++) {
 		struct ptr_array* map_array = &alm->maps[i];
 
 		qsort(map_array->array, map_array->len, sizeof(void*), &mapping_comparator);
 	}
-
-	almanac_print(alm);
 
 	return alm;
 
