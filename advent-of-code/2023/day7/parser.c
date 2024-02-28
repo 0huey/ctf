@@ -8,8 +8,6 @@ struct hand_list_t {
 	struct hand_t hand;
 };
 
-int char_comparator(const void* p1, const void* p2);
-
 struct hand_t* parse_hands(char* filebuff, size_t* out_num_hands) {
 	struct hand_list_t* head = NULL;
 	size_t num_hands = 0;
@@ -36,10 +34,9 @@ struct hand_t* parse_hands(char* filebuff, size_t* out_num_hands) {
 		for (int i = 0; i < HAND_SIZE && *line != '\0'; i++) {
 			hand->cards[i] = *line++;
 		}
+
 		sscanf(line, "%d", &hand->bid);
 		hand->strength = 0;
-
-		qsort(hand, HAND_SIZE, sizeof(char), char_comparator);
 
 		num_hands++;
 
@@ -61,12 +58,4 @@ struct hand_t* parse_hands(char* filebuff, size_t* out_num_hands) {
 
 	*out_num_hands = num_hands;
 	return hand_array;
-}
-
-
-int char_comparator(const void* p1, const void* p2) {
-	char c1 = *(const char*)p1;
-	char c2 = *(const char*)p2;
-
-	return c1 - c2;
 }
