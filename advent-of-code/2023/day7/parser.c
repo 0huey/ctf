@@ -16,8 +16,6 @@ struct hand_t* parse_hands(char* filebuff, size_t* out_num_hands) {
 	char* line = strtok(filebuff, "\n");
 
 	while (line != NULL) {
-		printf("parsing line %s\n", line);
-
 		if (head == NULL) {
 			head = malloc(sizeof(struct hand_list_t));
 			head->next = NULL;

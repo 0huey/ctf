@@ -1,4 +1,4 @@
-CC_OPTS = -Wall -O3 -I ../lib -L ../lib -l advent
+CC_OPTS = -Wall -Wno-char-subscripts -O3 -I ../lib -L ../lib -l advent
 
 all: solve solve-p2
 
