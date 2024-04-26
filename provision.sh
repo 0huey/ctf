@@ -3,7 +3,7 @@ export DEBIAN_FRONTEND=noninteractive
 set -x
 
 apt-get update
-apt-get install -y firewalld ncat gdb gdbserver jq python3-pip strace openjdk-17-jdk openjdk-17-jre geany gobuster
+apt-get install -y xxd terminator firewalld ncat gdb gdbserver jq python3-pip strace openjdk-17-jdk openjdk-17-jre gobuster
 
 pip3 install pwntools ROPGadget keystone-engine ropper
 
@@ -13,7 +13,9 @@ curl -s https://api.github.com/repos/NationalSecurityAgency/ghidra/releases/late
 
 sudo -u vagrant unzip -q /home/vagrant/Downloads/ghidra.zip -d /home/vagrant/Downloads
 
+set +x
 sudo -u vagrant sh -c "$(curl -fsSL http://gef.blah.cat/sh)"
+set -x
 
 gem install seccomp-tools
 
