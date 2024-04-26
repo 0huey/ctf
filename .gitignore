@@ -7,6 +7,7 @@ build
 a.out
 *.so
 *.db
-advent-of-code/*/*/*.txt
-advent-of-code/*/*/solve
-advent-of-code/*/*/solve-p2
+advent-of-code/**/*.txt
+advent-of-code/**/solve
+advent-of-code/**/solve-p2
+advent-of-code/**/target
